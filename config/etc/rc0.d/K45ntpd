@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo ... stop ntpd ...
+
+# ntpd pid file
+nptd_pid=$(cat /run/ntpd.pid)
+
+kill -9 ${ntpd_pid}
+
+logger -t TEST $0

@@ -1,0 +1,9 @@
+#!/bin/sh
+
+echo ... stop sound ...
+
+if [ -r /etc/sound ]; then
+    rm /etc/sound
+fi
+
+logger -t TEST $0

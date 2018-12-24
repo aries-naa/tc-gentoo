@@ -1,0 +1,7 @@
+#!/bin/sh
+
+base=/home/alex/gentoo/chroot/i486-linux-tc-build
+kversion=4.9.16-gentoo
+
+cat modules.list | xargs -n 1 modules-dep -b ${base} -k ${kversion} | sort -u > modules.dep.txt
+cat modules.dep.txt modules.list | sort -u | xargs -n 1 modinfo -F filename -b ${base} -k ${kversion} | sort > modules.dep.list

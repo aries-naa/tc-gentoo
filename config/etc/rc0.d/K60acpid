@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo ... stop acpid ...
+
+# acpid pid file
+acpid_pid=$(cat /run/acpid.pid)
+
+kill -9 ${acpid_pid}
+
+logger -t TEST $0

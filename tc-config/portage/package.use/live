@@ -1,0 +1,20 @@
+sys-apps/busybox -static syslog
+
+net-fs/cifs-utils -acl -ads -caps -caps-ng
+net-misc/dropbear minimal -static
+net-misc/rdesktop alsa -ao -kerberos -libressl -oss -pcsc-lite xrandr
+
+dev-lang/tk -aqua -xscreensaver
+dev-lang/tk truetype -aqua -xscreensaver
+
+#media-libs/mesa -llvm -gallium -video_cards_radeonsi -video_cards_intel
+media-libs/mesa -llvm -gallium -egl -gbm -nptl -dri3
+
+x11-apps/xinit minimal
+
+x11-base/xorg-server -glamor -libressl -selinux -systemd -libressl -tslib -unwind -xcsecurity udev minimal
+x11-base/xorg-drivers -video_cards_radeonsi -video_cards_amdgpu
+
+x11-drivers/xf86-video-intel -dri3 -xvmc
+x11-drivers/xf86-video-ati -glamor
+x11-drivers/xf86-video-amdgpu -glamor

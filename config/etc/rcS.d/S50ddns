@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# регистрация ddns.
+for iface_dir in /run/network/*; do
+    if [ -d "${iface_dir}" ]; then
+	iface=$(basename ${iface_dir})
+	/usr/local/bin/ddns ${iface}
+    fi
+done

@@ -1,0 +1,27 @@
+#!/bin/sh
+
+echo ... read config ...
+
+modprobe fuse
+
+overlay="lowerdir=/mnt/lo"
+
+for eth_dev_dir in /run/network/* ; do
+    
+    if [ -r "${eth_dev_dir}/rootpath" ]; then
+
+	eth_dev=$(basename ${eth_dev_dir})
+	overlay="${overlay}:/mnt/${eth_dev}"
+
+	read conf_root conf_user conf_domain conf_passwd x < "/run/network/${eth_dev}/rootpath"
+
+	mkdir -p "/mnt/${eth_dev}"
+	mount.cifs ${conf_root} "/mnt/${eth_dev}" -o user=${conf_user},domain=${conf_domain},password=${conf_passwd},uid=root,gid=root
+
+    fi
+    
+done
+
+mount -t overlay overlay -o ${overlay} /mnt/config
+
+exit 0

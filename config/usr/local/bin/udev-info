@@ -1,0 +1,4 @@
+#!/bin/sh
+
+udevadm info --query=all      --name=$1
+udevadm info --attribute-walk --name=$1

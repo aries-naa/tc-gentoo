@@ -1,0 +1,25 @@
+{26 {Front Headphone Jack}      BOOLEAN {}     o ff}
+{24 {Line Jack}                 BOOLEAN {}      off}
+{25 {Line Out Jack}             BOOLEAN {}      off}
+{23 {Mic Jack}                  BOOLEAN {}      off}
+{27 {Speaker Phantom Jack}      BOOLEAN {}      on}
+{22 {Master Playback Switch}    BOOLEAN {}      on}
+{21 {Master Playback Volume}    INTEGER {0 64}  52}
+{4  {Headphone Playback Switch} BOOLEAN {}      {on on}}
+{3  {Headphone Playback Volume} INTEGER {0 64}  {64 64}}
+{32 {PCM Playback Volume}       INTEGER {0 255} {100 101}}
+{20 {Line Boost Volume}         INTEGER {0 3}   {3 3}}
+{2  {Line Out Playback Switch}  BOOLEAN {}      {on on}}
+{1  {Line Out Playback Volume}  INTEGER {0 64}  {64 64}}
+{11 {Line Playback Switch}      BOOLEAN {}      {off off}}
+{10 {Line Playback Volume}      INTEGER {0 31}  {13 13}}
+{19 {Mic Boost Volume}          INTEGER {0 3}   {0 0}}
+{9  {Mic Playback Switch}       BOOLEAN {}      {off off}}
+{8  {Mic Playback Volume}       INTEGER {0 31}  {0 0}}
+{16 {Capture Switch}            BOOLEAN {}      {on on}}
+{18 {Capture Switch}            BOOLEAN {}      {off off}}
+{15 {Capture Volume}            INTEGER {0 31}  {9 9}}
+{17 {Capture Volume}            INTEGER {0 31}  {0 0}}
+{31 {Digital Capture Volume}    INTEGER {0 120} {60 60}}
+{6  {Speaker Playback Switch}   BOOLEAN {}      {on on}}
+{5  {Speaker Playback Volume}   INTEGER {0 64}  {64 64}}

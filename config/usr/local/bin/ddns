@@ -1,0 +1,19 @@
+#!/bin/sh
+
+iface=$1
+
+[ -n "${iface}" ] || exit 0
+
+if [ -r /run/network/${iface}/dns ]; then
+
+    name=$(cat /run/network/${iface}/dns)
+
+    if echo ${name} | grep "\." 2>&1 > /dev/null; then
+	echo udhcpc -i ${iface} -t 10 -n -q -F ${name}
+	udhcpc -i ${iface} -t 10 -n -q -F ${name}
+    else
+	echo udhcpc -i ${iface} -t 10 -n -q -x hostname:${name}
+	udhcpc -i ${iface} -t 10 -n -q -x hostname:${name}
+    fi
+
+fi

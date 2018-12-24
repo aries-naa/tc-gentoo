@@ -1,0 +1,26 @@
+#!/bin/sh
+
+echo ... klogd, syslogd ...
+
+# вывод сообщений на 12 консоль
+touch /var/log/messages
+tail -f /var/log/messages > /dev/tty12 &
+
+# klogd
+klogd
+
+# DNS-имя сервера, принимающего логи syslogd.
+remote_syslog=""
+
+if [ -r /etc/remote-syslog ]; then
+    remote_syslog=$(cat /etc/remote-syslog)
+fi
+
+# перезапуск syslogd если есть сервер принимающий логи.
+if [ -n "${remote_syslog}" ]; then
+    syslogd -L -R "${remote_syslog}"
+else
+    syslogd
+fi
+
+unset remote_syslog

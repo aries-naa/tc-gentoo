@@ -1,0 +1,241 @@
+#!/bin/zsh
+
+name=tc-build
+
+compile_packages () {
+
+    chr ${name} emerge -k \
+\
+	 x11-apps/xauth \
+	 x11-apps/xrandr \
+	 x11-apps/xset \
+	 x11-apps/xinit \
+	 x11-apps/xkbcomp \
+	 x11-apps/xrdb \
+	 x11-apps/iceauth \
+	 x11-apps/rgb \
+	 x11-terms/xvt \
+	 net-misc/rdesktop \
+	 net-analyzer/net-snmp \
+	 app-crypt/libmd \
+	 app-crypt/ccid \
+	 sys-apps/busybox \
+	 sys-apps/ethtool \
+	 sys-apps/net-tools \
+	 sys-apps/pcsc-lite \
+	 sys-fs/fuse \
+	 sys-fs/ntfs3g \
+	 sys-fs/fuse-exfat \
+	 sys-fs/exfat-utils \
+	 sys-fs/eudev \
+	 media-sound/alsa-utils \
+	 net-fs/cifs-utils \
+	 net-misc/dropbear \
+	 dev-lang/tcl \
+	 dev-lang/tk \
+	 dev-libs/expat \
+	 dev-tcltk/thread \
+	 dev-tcltk/tcllib \
+	 dev-tcltk/bwidget \
+\
+	 x11-drivers/xf86-video-dummy \
+	 x11-drivers/xf86-video-ati \
+	 x11-drivers/xf86-video-fbdev \
+	 x11-drivers/xf86-video-geode \
+	 x11-drivers/xf86-video-intel \
+	 x11-drivers/xf86-video-nouveau \
+	 x11-drivers/xf86-video-openchrome \
+	 x11-drivers/xf86-video-vesa \
+	 x11-drivers/xf86-video-qxl \
+	 x11-drivers/xf86-input-evdev \
+	 x11-drivers/xf86-input-keyboard \
+	 x11-drivers/xf86-input-libinput \
+	 x11-drivers/xf86-input-mouse \
+\
+	 sys-apps/tcp-wrappers \
+	 sys-libs/mtdev \
+	 media-fonts/freefont \
+	 media-libs/fontconfig \
+	 media-libs/freetype \
+	 media-libs/alsa-lib \
+	 media-libs/mesa \
+	 media-libs/libsamplerate \
+	 dev-libs/libevdev \
+	 dev-libs/libpthread-stubs \
+	 dev-libs/libgcrypt \
+	 dev-libs/iniparser \
+	 dev-libs/popt \
+	 dev-libs/libxslt \
+	 dev-libs/glib \
+	 dev-libs/libpcre \
+	 dev-libs/libltdl \
+	 dev-libs/libgpg-error \
+	 dev-libs/libtommath \
+	 dev-libs/openssl \
+	 dev-libs/libinput \
+	 dev-libs/libffi \
+	 dev-libs/libbsd \
+	 dev-libs/libxml2 \
+	 dev-libs/libusb \
+	 x11-libs/libXaw \
+	 x11-libs/libXinerama \
+	 x11-libs/libXrender \
+	 x11-libs/libXvMC \
+	 x11-libs/libXft \
+	 x11-libs/libpciaccess \
+	 x11-libs/libdrm \
+	 x11-libs/libXext \
+	 x11-libs/libXpm \
+	 x11-libs/libpciaccess \
+	 x11-libs/libXdmcp \
+	 x11-libs/xtrans \
+	 x11-libs/libXrender \
+	 x11-libs/libxcb \
+	 x11-libs/libXfont2 \
+	 x11-libs/libICE \
+	 x11-libs/libX11 \
+	 x11-libs/pixman \
+	 x11-libs/libfontenc \
+	 x11-libs/libXv \
+	 x11-libs/libXinerama \
+	 x11-libs/libXau \
+	 x11-libs/libXt \
+	 x11-libs/libXmu \
+	 x11-libs/libSM \
+	 x11-libs/libXrandr \
+	 x11-libs/libxkbfile \
+	 x11-libs/libXxf86vm \
+	 x11-libs/libXaw \
+	 x11-libs/libxshmfence \
+	 x11-libs/libXdamage \
+	 x11-libs/libXvMC \
+	 x11-libs/libXfixes \
+	 x11-libs/libXft \
+	 x11-libs/libXScrnSaver \
+	 x11-misc/xkeyboard-config \
+	 x11-misc/xbitmaps \
+	 x11-misc/util-macros \
+	 x11-misc/shared-mime-info \
+	 x11-base/xorg-server \
+	 x11-base/xorg-drivers \
+	 virtual/libusb \
+	 virtual/ttf-fonts \
+	 virtual/libudev \
+	 app-eselect/eselect-mesa \
+	 app-eselect/eselect-opengl \
+	 app-eselect/eselect-python \
+	 app-eselect/eselect-fontconfig \
+	 app-eselect/eselect-xvmc \
+\
+	 app-portage/gentoolkit \
+	 app-misc/mc \
+	 sys-kernel/genkernel
+
+}
+
+
+compile_kernel () {
+
+    root=$(chr -p ${name})
+
+    chr ${name} emerge -k \
+	 sys-kernel/gentoo-sources
+
+    # genkernel config.
+    sudo sed '
+s/^.*INSTALL.*/INSTALL="yes"/
+s/^.*ARCH_OVERRIDE=.*/ARCH_OVERRIDE="x86"/
+s/^.*MOUNTBOOT=.*/MOUNTBOOT="no"/
+s/^.*SYMLINK=.*/SYMLINK="no"/
+s/^.*LVM=.*/LVM="no"/
+s/^.*LUKS=.*/LUKS="no"/
+s/^.*GPG=.*/GPG="no"/
+s/^.*DMRAID=.*/DMRAID="no"/
+s/^.*BUSYBOX=.*/BUSYBOX="yes"/
+s/^.*MDADM=.*/MDADM="no"/
+s/^.*ISCSI=.*/ISCSI="no"/
+s/^.*E2FSPROGS=.*/E2FSPROGS="no"/
+s/^.*ZFS=.*/ZFS="no"/
+s/^.*BTRFS=.*/BTRSF="no"/
+s/^.*FIRMWARE=.*/FIRMWARE="no"/
+s/^.*SPLASH=.*/SPLASH="no"/
+s/^.*BOOTDIR=.*/BOOTDIR="\/boot"/
+s/^MENUCONFIG/#MENUCONFIG/' -i ${root}/etc/genkernel.conf
+
+    kversion=$(chr ${name} equery -q list sys-kernel/gentoo-sources -F '$fullversion' | tail -n1)
+    chr ${name} mkdir -p /etc/kernels
+    sudo cp tc-config/kernel-config-x86-${kversion}-gentoo ${root}/etc/kernels
+#    pkg_dir=$(chr ${name} emerge --info | grep PKGDIR | sed "s/PKGDIR=\"\(.*\)\"/\1/g")
+    chr ${name} mkdir -p ${pkg_dir}/kernel
+    chr ${name} genkernel --no-menuconfig --kernel-config=/etc/kernels/kernel-config-x86-${kversion}-gentoo kernel
+#    chr ${name} emerge -k \
+#	 sys-kernel/shipka-kc2 \
+#	 sys-kernel/shipka-kc3
+#    chr ${name} emerge -k \
+#	 sys-kernel/proc-usb
+    chr ${name} tar -C / -Jcvf ${pkg_dir}/kernel/kernel-${kversion}-gentoo.tar.xz boot/System.map-genkernel-x86-${kversion}-gentoo boot/kernel-genkernel-x86-${kversion}-gentoo lib/modules/${kversion}-gentoo
+
+}
+
+configure_chroot () {
+
+    cat << EOF | chr ${name} tee /etc/portage/make.conf > /dev/null
+CFLAGS="-Os -march=i686 -pipe"
+CXXFLAGS="\${CFLAGS}"
+CHOST="i686-pc-linux-gnu"
+USE="bindist"
+PORTDIR="/usr/portage"
+DISTDIR="\${PORTDIR}/distfiles"
+PKGDIR="\${PORTDIR}/packages/${name}"
+FEATURES="buildpkg"
+EOF
+
+    cat << EOF | chr ${name} tee /etc/portage/package.accept_keywords/tc-build > /dev/null
+x11-drivers/xf86-video-openchrome ~x86
+EOF
+
+    cat << EOF | chr ${name} tee /etc/portage/package.use/tc > /dev/null
+sys-apps/busybox -static syslog
+sys-apps/util-linux static-libs
+net-fs/cifs-utils -acl -ads -caps -caps-ng
+net-misc/dropbear minimal -static
+net-misc/rdesktop alsa -ao -kerberos -libressl -oss -pcsc-lite xrandr
+dev-lang/tk -aqua -xscreensaver
+dev-lang/tk truetype -aqua -xscreensaver
+media-libs/mesa -llvm -gallium -video_cards_radeonsi -video_cards_intel
+x11-apps/xinit minimal
+x11-base/xorg-server -glamor -libressl -selinux -systemd -tslib udev
+x11-base/xorg-drivers -video_cards_radeonsi -video_cards_amdgpu
+x11-drivers/xf86-video-intel -dri3 -xvmc
+x11-drivers/xf86-video-ati -glamor
+x11-drivers/xf86-video-amdgpu -glamor
+EOF
+
+    cat << EOF | chr ${name} tee /etc/portage/repos.conf/gentoo.conf > /dev/null
+[DEFAULT]
+main-repo = gentoo
+
+[gentoo]
+location = /usr/portage
+sync-type = rsync
+sync-uri = rsync://rsync.gentoo.org/gentoo-portage
+auto-sync = yes
+EOF
+
+#    cat << EOF | chr ${name} tee /etc/portage/repos.conf/tc.conf > /dev/null
+#[tc]
+#location = /usr/overlays/tc
+#masters = gentoo
+#auto-sync = no
+#EOF
+
+}
+
+# настройка portage.
+#configure_chroot
+
+# сборка пакетов.
+#compile_packages
+
+# kernel.
+compile_kernel

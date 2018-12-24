@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo ... stop udevd ...
+
+killall -9 udevd
+
+umount /proc/bus/usb
+umount /sys/kernel/debug
+
+logger -t TEST $0

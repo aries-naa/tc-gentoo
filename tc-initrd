@@ -1,0 +1,29 @@
+#!/bin/zsh
+
+arch=i686
+name=tc
+kversion=4.14.52-gentoo
+#kversion=4.9.34-gentoo
+#kversion=4.12.12-gentoo
+root=$(chr -p ${name})
+
+kpkg=${HOME}/gentoo/packages/${name}-build/kernel/kernel-${kversion}.tar.xz
+
+# kernel.
+rm -f build/vmlinuz
+tar -J -x -v -C build -f ${kpkg} --strip-components 1 --wildcards -x "boot/kernel*"
+mv build/kernel-genkernel-x86-${kversion} build/vmlinuz
+
+# config.
+tar -cvf - -C config . | sudo tar -xvf - --no-same-owner -C ${root}
+
+## image.
+#rm -f build/initrd
+#sudo mksquashfs ${root} build/initrd -comp xz -Xbcj x86
+#sudo chown ${USER}:users build/initrd
+
+bdir=$(pwd)/build
+(
+    cd ${root}
+    sudo find . | sudo cpio -H newc -o | gzip -c > ${bdir}/initrd
+)

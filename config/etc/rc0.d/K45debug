@@ -1,0 +1,9 @@
+#!/bin/sh
+
+echo ... stop debug ...
+
+if [ -r /etc/debug ]; then
+    rm /etc/debug
+fi
+
+logger -t TEST $0

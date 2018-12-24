@@ -1,0 +1,15 @@
+#!/bin/sh
+
+echo ... udevd ...
+
+# загрузка udev
+USEV_ROOT=/dev /sbin/udevd --daemon --resolve-names=never
+udevadm trigger --action=add
+udevadm settle
+
+modprobe proc_usb
+mount -t debugfs debugfs /sys/kernel/debug
+mount --bind /dev/bus/usb /proc/bus/usb
+if [ -e /sys/kernel/debug/usb/devices ]; then
+    ln -sf /sys/kernel/debug/usb/devices /proc/bus/usb/devices
+fi

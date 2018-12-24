@@ -1,0 +1,1257 @@
+#!/bin/zsh
+
+arch=i686
+name=tc
+kversion=4.14.52-gentoo
+#kversion=4.9.34-gentoo
+#kversion=4.12.12-gentoo
+#kversion=4.9.0-3-686
+kpkg=/usr/portage/packages/${name}-build/kernel/kernel-${kversion}.tar.xz
+root=$(chr -p ${name})
+
+install_system () {
+
+    chr -i gentoo ${name} latest ${arch}
+
+    cat << EOF | chr ${name} tee /etc/portage/make.conf > /dev/null
+CFLAGS="-Os -march=i686 -pipe"
+CXXFLAGS="\${CFLAGS}"
+CHOST="i686-pc-linux-gnu"
+USE="bindist"
+PORTDIR="/usr/portage"
+DISTDIR="\${PORTDIR}/distfiles"
+PKGDIR="\${PORTDIR}/packages/${name}-build"
+FEATURES="buildpkg"
+EOF
+
+    # overlays.
+    chr ${name} mkdir -p /etc/portage/repos.conf
+
+    cat << EOF | chr ${name} tee /etc/portage/repos.conf/gentoo.conf > /dev/null
+[DEFAULT]
+main-repo = gentoo
+
+[gentoo]
+location = /usr/portage
+sync-type = rsync
+sync-uri = rsync://rsync.gentoo.org/gentoo-portage
+auto-sync = yes
+EOF
+
+#    cat << EOF | chr ${name} tee /etc/portage/repos.conf/tc.conf > /dev/null
+#[tc]
+#location = /usr/overlays/tc
+#masters = gentoo
+#auto-sync = no
+#EOF
+
+    cat << EOF | chr ${name} tee /etc/portage/package.accept_keywords/tc > /dev/null
+x11-drivers/xf86-video-openchrome ~x86
+EOF
+
+    cat << EOF | chr ${name} tee /etc/portage/package.use/tc > /dev/null
+sys-apps/busybox -static syslog
+net-fs/cifs-utils -acl -ads -caps -caps-ng
+net-misc/dropbear minimal -static
+x11-apps/xinit minimal
+dev-lang/tk -aqua -xscreensaver
+dev-lang/tk truetype -aqua -xscreensaver
+net-misc/rdesktop alsa -ao -kerberos -libressl -oss -pcsc-lite xrandr
+media-libs/mesa -llvm -gallium -video_cards_radeonsi -video_cards_intel
+x11-base/xorg-server -glamor -libressl -selinux -systemd -tslib udev
+x11-base/xorg-drivers -video_cards_radeonsi -video_cards_amdgpu
+x11-drivers/xf86-video-intel -dri3 -xvmc
+x11-drivers/xf86-video-ati -glamor
+x11-drivers/xf86-video-amdgpu -glamor
+EOF
+
+}
+
+install_packages () {
+
+    # установка.
+#1.ok#    chr ${name} emerge -e -K \
+    chr ${name} emerge -K \
+	 app-crypt/libmd \
+	 app-crypt/ccid \
+	 sys-apps/busybox \
+	 sys-apps/ethtool \
+	 sys-apps/net-tools \
+	 sys-apps/pcsc-lite \
+	 sys-fs/fuse \
+	 sys-fs/ntfs3g \
+	 sys-fs/eudev \
+	 media-sound/alsa-utils \
+	 media-fonts/freefont \
+	 media-libs/fontconfig \
+	 net-fs/cifs-utils \
+	 net-misc/dropbear \
+	 sys-fs/fuse-exfat \
+	 x11-libs/libXaw \
+	 x11-libs/libXinerama \
+	 x11-libs/libXrender \
+	 x11-libs/libXvMC \
+	 x11-libs/libXft \
+	 x11-terms/xvt \
+	 x11-apps/xauth \
+	 x11-apps/xrandr \
+	 x11-apps/xset \
+	 x11-apps/xinit \
+	 dev-lang/tcl \
+	 dev-lang/tk \
+	 dev-tcltk/thread \
+	 dev-tcltk/tcllib \
+	 dev-tcltk/bwidget \
+	 net-analyzer/net-snmp \
+	 net-misc/rdesktop \
+	 x11-misc/xkeyboard-config \
+	 x11-base/xorg-server \
+	 x11-drivers/xf86-video-ati \
+	 x11-drivers/xf86-video-fbdev \
+	 x11-drivers/xf86-video-geode \
+	 x11-drivers/xf86-video-intel \
+	 x11-drivers/xf86-video-nouveau \
+	 x11-drivers/xf86-video-openchrome \
+	 x11-drivers/xf86-video-vesa \
+	 x11-drivers/xf86-video-qxl \
+	 x11-drivers/xf86-input-evdev
+
+#	 '=dev-lang/python-2.7.12' \
+#	 '=dev-lang/python-3.4.5' \
+
+}
+
+remove_packages () {
+
+    # удаление пакетов.
+    chr ${name} emerge --unmerge \
+	 'app-admin/*' \
+	 'app-text/*' \
+	 'app-editors/*' \
+	 'dev-libs/*' \
+	 'dev-perl/*' \
+	 'dev-python/*' \
+	 'dev-util/*' \
+	 'app-eselect/*' \
+	 'net-firewall/*' \
+	 'net-libs/*' \
+	 'sys-apps/man*' \
+	 'sys-devel/*' \
+	 'sys-kernel/*' \
+	 'sys-process/*' \
+	 'virtual/*' \
+	 'x11-proto/*' \
+	 app-misc/ca-certificates \
+	 app-misc/c_rehash \
+	 app-misc/editor-wrapper \
+	 app-misc/mime-types \
+	 dev-lang/perl \
+	 dev-lang/python \
+	 perl-core/File-Temp \
+	 media-libs/libepoxy \
+	 media-libs/libsamplerate \
+	 media-libs/mesa \
+	 net-misc/iputils \
+	 net-misc/netifrc \
+	 net-misc/openssh \
+	 net-misc/rsync \
+	 net-misc/wget \
+	 sys-apps/help2man \
+	 sys-apps/debianutils \
+	 sys-apps/diffutils \
+	 sys-apps/tcp-wrappers \
+	 sys-apps/file \
+	 sys-apps/gawk \
+	 sys-apps/groff \
+	 sys-apps/hwids \
+	 sys-apps/install-xattr \
+	 sys-apps/iproute2 \
+	 sys-apps/kbd \
+	 sys-apps/keyutils \
+	 sys-apps/less \
+	 sys-apps/openrc \
+	 sys-apps/sandbox \
+	 sys-apps/texinfo \
+	 sys-apps/sysvinit \
+	 sys-apps/baselayout \
+	 sys-apps/util-linux \
+	 sys-apps/gentoo-functions \
+	 sys-auth/pambase \
+	 sys-apps/shadow \
+	 sys-apps/which \
+	 sys-fs/e2fsprogs \
+	 sys-fs/udev-init-scripts \
+	 sys-libs/cracklib \
+	 sys-libs/db \
+	 sys-libs/e2fsprogs-libs \
+	 sys-libs/gdbm \
+	 sys-libs/libseccomp \
+	 sys-libs/pam \
+	 sys-libs/talloc \
+	 sys-libs/timezone-data \
+	 x11-apps/xauth \
+	 x11-apps/rgb \
+	 x11-apps/xrdb \
+	 x11-apps/iceauth \
+	 x11-libs/xtrans \
+	 x11-drivers/xf86-input-keyboard \
+	 x11-drivers/xf86-input-mouse \
+	 x11-drivers/xf86-input-libinput
+
+    cat << EOF | sudo tee ${root}/etc/os-release > /dev/null
+ID=gentoo
+EOF
+
+    sudo ln -sf busybox ${root}/bin/diff
+    sudo ln -sf busybox ${root}/bin/awk
+    sudo ln -sf awk ${root}/bin/gawk
+
+    chr ${name} emerge --unmerge app-arch/xz-utils
+    sudo ln -sf busybox ${root}/bin/xz
+    sudo ln -sf busybox ${root}/bin/unxz
+
+    chr ${name} emerge --unmerge app-arch/unzip
+    sudo ln -sf busybox ${root}/bin/unzip
+
+    chr ${name} emerge --unmerge app-arch/tar
+    sudo ln -sf busybox ${root}/bin/tar
+
+    chr ${name} emerge --unmerge sys-apps/grep
+    sudo ln -sf busybox ${root}/bin/grep
+
+    chr ${name} emerge --unmerge sys-apps/sed
+    sudo ln -sf busybox ${root}/bin/sed
+
+    chr ${name} emerge --unmerge app-arch/gzip
+    sudo ln -sf busybox ${root}/bin/gzip
+    sudo ln -sf busybox ${root}/bin/gunzip
+
+    chr ${name} emerge --unmerge app-arch/bzip2
+    sudo ln -sf busybox ${root}/bin/bzip2
+    sudo ln -sf busybox ${root}/bin/bunzip2
+
+    chr ${name} emerge --unmerge sys-apps/findutils
+    sudo ln -sf busybox ${root}/bin/find
+
+    chr ${name} emerge --unmerge sys-apps/coreutils
+    sudo ln -sf busybox ${root}/bin/uname
+    sudo ln -sf busybox ${root}/bin/chgrp
+    sudo ln -sf busybox ${root}/bin/chmod
+    sudo ln -sf busybox ${root}/bin/rm
+    sudo ln -sf busybox ${root}/bin/mv
+    sudo ln -sf busybox ${root}/bin/ls
+    sudo ln -sf busybox ${root}/bin/ln
+    sudo ln -sf busybox ${root}/bin/cat
+    sudo ln -sf busybox ${root}/bin/echo
+    sudo ln -sf busybox ${root}/bin/cp
+
+    chr ${name} emerge --unmerge \
+	 sys-apps/acl \
+	 sys-apps/attr
+}
+
+remove_files () {
+
+    unsetopt nomatch
+
+    # удаление файов.
+    sudo rm -rfv \
+	 ${root}/etc/skel \
+	 ${root}/etc/X11 \
+	 ${root}/etc/xml \
+	 ${root}/etc/bash \
+	 ${root}/etc/conf.d \
+	 ${root}/etc/env.d \
+	 ${root}/etc/fonts \
+	 ${root}/etc/init.d \
+	 ${root}/etc/ld.so.conf.d \
+	 ${root}/etc/logrotate.d \
+	 ${root}/etc/pam.d \
+	 ${root}/etc/portage \
+	 ${root}/etc/profile.d \
+	 ${root}/etc/python-exec \
+	 ${root}/etc/request-key.d \
+	 ${root}/etc/runlevels \
+	 ${root}/etc/sandbox.d \
+	 ${root}/etc/sgml \
+	 ${root}/etc/ssl \
+	 ${root}/etc/xml \
+	 ${root}/etc/.pwd.lock \
+	 ${root}/etc/csh.env \
+	 ${root}/etc/dispatch-conf.conf \
+	 ${root}/etc/etc-update.conf \
+	 ${root}/etc/fstab \
+	 ${root}/etc/gai.conf \
+	 ${root}/etc/group- \
+	 ${root}/etc/gshadow- \
+	 ${root}/etc/host.conf \
+	 ${root}/etc/locale.gen \
+	 ${root}/etc/localtime \
+	 ${root}/etc/passwd- \
+	 ${root}/etc/profile.env \
+	 ${root}/etc/resolv.conf \
+	 ${root}/etc/rpc \
+	 ${root}/etc/shadow- \
+	 ${root}/etc/timezone \
+	 ${root}/etc/udhcpd.conf \
+	 ${root}/etc/fuse.conf \
+	 ${root}/etc/udev/hwdb.bin \
+	 ${root}/etc/*- \
+	 ${root}/bin/bash \
+	 ${root}/bin/rbash \
+	 ${root}/bin/hostname \
+	 ${root}/bin/ifconfig \
+	 ${root}/bin/netstat \
+	 ${root}/bin/route \
+	 ${root}/bin/dnsdomainname \
+	 ${root}/bin/kmod \
+	 ${root}/bin/tmpfiles \
+	 ${root}/sbin/sln \
+	 ${root}/sbin/ldconfig \
+	 ${root}/sbin/arp \
+	 ${root}/sbin/ipmaddr \
+	 ${root}/sbin/iptunnel \
+	 ${root}/sbin/nameif \
+	 ${root}/sbin/rarp \
+	 ${root}/lib/libcom_err.* \
+	 ${root}/lib/libcrack.* \
+	 ${root}/lib/libkeyutils.* \
+	 ${root}/lib/liblzma.* \
+	 ${root}/lib/libmnl.* \
+	 ${root}/lib/libpam.* \
+	 ${root}/lib/libpcre.* \
+	 ${root}/lib/libxtables.* \
+	 ${root}/usr/i486-pc-linux* \
+	 ${root}/usr/i686-pc-linux* \
+	 ${root}/usr/bin/2to3* \
+	 ${root}/usr/bin/aconnect \
+	 ${root}/usr/bin/addr2line \
+	 ${root}/usr/bin/alsa* \
+	 ${root}/usr/bin/apl* \
+	 ${root}/usr/bin/amidi \
+	 ${root}/usr/bin/ar* \
+	 ${root}/usr/bin/as* \
+	 ${root}/usr/bin/awk \
+	 ${root}/usr/bin/bashbug \
+	 ${root}/usr/bin/c* \
+	 ${root}/usr/bin/d* \
+	 ${root}/usr/bin/freetype-config \
+	 ${root}/usr/bin/g* \
+	 ${root}/usr/bin/iconv \
+	 ${root}/usr/bin/e* \
+	 ${root}/usr/bin/i* \
+	 ${root}/usr/bin/l* \
+	 ${root}/usr/bin/ncu* \
+	 ${root}/usr/bin/nm \
+	 ${root}/usr/bin/nn* \
+	 ${root}/usr/bin/e* \
+	 ${root}/usr/bin/i* \
+	 ${root}/usr/bin/l* \
+	 ${root}/usr/bin/ncu* \
+	 ${root}/usr/bin/nm \
+	 ${root}/usr/bin/nn* \
+	 ${root}/usr/bin/sudo \
+	 ${root}/usr/bin/rm \
+	 ${root}/usr/bin/snmp* \
+	 ${root}/usr/bin/agentxtrap \
+	 ${root}/usr/bin/ntfs-3g.probe \
+	 ${root}/usr/bin/ntfs-3g.secaudit \
+	 ${root}/usr/bin/ntfs-3g.usermap \
+	 ${root}/usr/bin/o* \
+	 ${root}/usr/bin/p* \
+	 ${root}/usr/bin/q* \
+	 ${root}/usr/bin/ranlib \
+	 ${root}/usr/bin/readelf \
+	 ${root}/usr/bin/reset \
+	 ${root}/usr/bin/rpcgen \
+	 ${root}/usr/bin/scanelf \
+	 ${root}/usr/bin/scanmacho \
+	 ${root}/usr/bin/scanpci \
+	 ${root}/usr/bin/size \
+	 ${root}/usr/bin/sotruss \
+	 ${root}/usr/bin/speaker-test \
+	 ${root}/usr/bin/sprof \
+	 ${root}/usr/bin/strings \
+	 ${root}/usr/bin/strip \
+	 ${root}/usr/bin/sxpm \
+	 ${root}/usr/bin/symtree \
+	 ${root}/usr/bin/tabs \
+	 ${root}/usr/bin/tcldocstrip \
+	 ${root}/usr/bin/m* \
+	 ${root}/usr/bin/tic \
+	 ${root}/usr/bin/toe \
+	 ${root}/usr/bin/tput \
+	 ${root}/usr/bin/tset \
+	 ${root}/usr/bin/ulockmgr_server \
+	 ${root}/usr/bin/unionfsctl \
+	 ${root}/usr/bin/xtrace \
+	 ${root}/usr/bin/ntfsc* \
+	 ${root}/usr/bin/ntfsd* \
+	 ${root}/usr/bin/ntfsf* \
+	 ${root}/usr/bin/ntfsi* \
+	 ${root}/usr/bin/ntfsl* \
+	 ${root}/usr/bin/ntfsm* \
+	 ${root}/usr/bin/ntfsr* \
+	 ${root}/usr/bin/ntfst* \
+	 ${root}/usr/bin/ntfsw* \
+	 ${root}/usr/sbin/alsa* \
+	 ${root}/usr/sbin/archive-conf \
+	 ${root}/usr/sbin/cifs.upcall \
+	 ${root}/usr/sbin/dispatch-conf \
+	 ${root}/usr/sbin/emaint \
+	 ${root}/usr/sbin/env-update \
+	 ${root}/usr/sbin/etc-update \
+	 ${root}/usr/sbin/fix_libtool_files.sh \
+	 ${root}/usr/sbin/fixpackages \
+	 ${root}/usr/sbin/iconvconfig \
+	 ${root}/usr/sbin/locale-gen \
+	 ${root}/usr/sbin/mkfs.ntfs \
+	 ${root}/usr/sbin/mkntfs \
+	 ${root}/usr/sbin/mount.lowntfs-3g \
+	 ${root}/usr/sbin/ntfs* \
+	 ${root}/usr/sbin/regenworld \
+	 ${root}/usr/sbin/snmptrapd \
+	 ${root}/usr/include \
+	 ${root}/usr/i486-pc-linux-gnu \
+	 ${root}/usr/lib/mozilla \
+	 ${root}/usr/lib/pkgconfig \
+	 ${root}/usr/lib/portage \
+	 ${root}/usr/lib/python-exec \
+	 ${root}/usr/lib/python2.7 \
+	 ${root}/usr/lib/python3.6 \
+	 ${root}/usr/lib/*.a \
+	 ${root}/usr/lib/*.o \
+	 ${root}/usr/lib/cracklib_dict.\* \
+	 ${root}/usr/lib/libdb\* \
+	 ${root}/usr/lib/libelf\* \
+	 ${root}/usr/lib/libepoxy.\* \
+	 ${root}/usr/lib/libffi.\* \
+	 ${root}/usr/lib/libgbm.\* \
+	 ${root}/usr/lib/libgcrypt.\* \
+	 ${root}/usr/lib/libgdbm* \
+	 ${root}/usr/lib/libglapi.\* \
+	 ${root}/usr/lib/libglib* \
+	 ${root}/usr/lib/libGL.* \
+	 ${root}/usr/lib/libgmp.* \
+	 ${root}/usr/lib/libiniparser.* \
+	 ${root}/usr/lib/libk5crypto.* \
+	 ${root}/usr/lib/libkrb5* \
+	 ${root}/usr/lib/libLLVM* \
+	 ${root}/usr/lib/libmpc.* \
+	 ${root}/usr/lib/libmpfr.* \
+	 ${root}/usr/lib/libperl.* \
+	 ${root}/usr/lib/libpipeline.* \
+	 ${root}/usr/lib/libpopt.* \
+	 ${root}/usr/lib/libpython* \
+	 ${root}/usr/lib/libsamplerate.* \
+	 ${root}/usr/lib/libseccomp.* \
+	 ${root}/usr/lib/libtalloc.* \
+	 ${root}/usr/lib/libxatracker.* \
+	 ${root}/usr/lib/libxml2.* \
+	 ${root}/usr/lib/alsa-lib \
+	 ${root}/usr/lib/alsa-lib \
+	 ${root}/usr/lib/audit \
+	 ${root}/usr/lib/dri \
+	 ${root}/usr/lib/misc \
+	 ${root}/usr/lib/security \
+	 ${root}/usr/lib/systemd \
+	 ${root}/usr/lib/gconv/A* \
+	 ${root}/usr/lib/gconv/B* \
+	 ${root}/usr/lib/gconv/CP10* \
+	 ${root}/usr/lib/gconv/CP11* \
+	 ${root}/usr/lib/gconv/CP1250* \
+	 ${root}/usr/lib/gconv/CP1252* \
+	 ${root}/usr/lib/gconv/CP1253* \
+	 ${root}/usr/lib/gconv/CP1254* \
+	 ${root}/usr/lib/gconv/CP1255* \
+	 ${root}/usr/lib/gconv/CP1256* \
+	 ${root}/usr/lib/gconv/CP1257* \
+	 ${root}/usr/lib/gconv/CP1258* \
+	 ${root}/usr/lib/gconv/CP7* \
+	 ${root}/usr/lib/gconv/CP9* \
+	 ${root}/usr/lib/gconv/CS* \
+	 ${root}/usr/lib/gconv/CW* \
+	 ${root}/usr/lib/gconv/D* \
+	 ${root}/usr/lib/gconv/E* \
+	 ${root}/usr/lib/gconv/G* \
+	 ${root}/usr/lib/gconv/H* \
+	 ${root}/usr/lib/gconv/IBM* \
+	 ${root}/usr/lib/gconv/IE* \
+	 ${root}/usr/lib/gconv/IN* \
+	 ${root}/usr/lib/gconv/ISI* \
+	 ${root}/usr/lib/gconv/ISO-* \
+	 ${root}/usr/lib/gconv/ISO_* \
+	 ${root}/usr/lib/gconv/ISO6* \
+	 ${root}/usr/lib/gconv/ISO8859-2* \
+	 ${root}/usr/lib/gconv/ISO8859-3* \
+	 ${root}/usr/lib/gconv/ISO8859-4* \
+	 ${root}/usr/lib/gconv/ISO8859-5* \
+	 ${root}/usr/lib/gconv/ISO8859-6* \
+	 ${root}/usr/lib/gconv/ISO8859-7* \
+	 ${root}/usr/lib/gconv/ISO8859-8* \
+	 ${root}/usr/lib/gconv/ISO8859-9* \
+	 ${root}/usr/lib/gconv/ISO8859-9E* \
+	 ${root}/usr/lib/gconv/ISO8859-10* \
+	 ${root}/usr/lib/gconv/ISO8859-11* \
+	 ${root}/usr/lib/gconv/ISO8859-12* \
+	 ${root}/usr/lib/gconv/ISO8859-13* \
+	 ${root}/usr/lib/gconv/ISO8859-14* \
+	 ${root}/usr/lib/gconv/ISO8859-15* \
+	 ${root}/usr/lib/gconv/ISO8859-16* \
+	 ${root}/usr/lib/gconv/J* \
+	 ${root}/usr/lib/gconv/K* \
+	 ${root}/usr/lib/gconv/L* \
+	 ${root}/usr/lib/gconv/M* \
+	 ${root}/usr/lib/gconv/N* \
+	 ${root}/usr/lib/gconv/P* \
+	 ${root}/usr/lib/gconv/R* \
+	 ${root}/usr/lib/gconv/S* \
+	 ${root}/usr/lib/gconv/T* \
+	 ${root}/usr/lib/gconv/UHC* \
+	 ${root}/usr/lib/gconv/UTF-32* \
+	 ${root}/usr/lib/gconv/UTF-7* \
+	 ${root}/usr/lib/gconv/V* \
+	 ${root}/usr/lib/gconv/lib* \
+	 ${root}/usr/share/i18n \
+	 ${root}/usr/share/doc \
+	 ${root}/usr/share/man \
+	 ${root}/usr/share/locale \
+	 ${root}/usr/share/libdrm \
+	 ${root}/usr/share/mime \
+	 ${root}/usr/share/sounds \
+	 ${root}/usr/share/info \
+	 ${root}/usr/share/aclocal \
+	 ${root}/usr/share/applications \
+	 ${root}/usr/share/busybox \
+	 ${root}/usr/share/fc-lang \
+	 ${root}/usr/share/gcc-data \
+	 ${root}/usr/share/gdb \
+	 ${root}/usr/share/pkgconfig \
+	 ${root}/usr/share/polkit-1 \
+	 ${root}/usr/share/portage \
+	 ${root}/usr/share/udhcpc \
+	 ${root}/usr/share/xml \
+	 ${root}/usr/share/elt-patches \
+	 ${root}/usr/share/snmp \
+	 ${root}/usr/share/xsessions \
+	 ${root}/usr/share/terminfo/1 \
+	 ${root}/usr/share/terminfo/2 \
+	 ${root}/usr/share/terminfo/3 \
+	 ${root}/usr/share/terminfo/4 \
+	 ${root}/usr/share/terminfo/5 \
+	 ${root}/usr/share/terminfo/6 \
+	 ${root}/usr/share/terminfo/7 \
+	 ${root}/usr/share/terminfo/8 \
+	 ${root}/usr/share/terminfo/9 \
+	 ${root}/usr/share/terminfo/A \
+	 ${root}/usr/share/terminfo/E \
+	 ${root}/usr/share/terminfo/L \
+	 ${root}/usr/share/terminfo/M \
+	 ${root}/usr/share/terminfo/N \
+	 ${root}/usr/share/terminfo/P \
+	 ${root}/usr/share/terminfo/Q \
+	 ${root}/usr/share/terminfo/X \
+	 ${root}/usr/share/terminfo/a \
+	 ${root}/usr/share/terminfo/b \
+	 ${root}/usr/share/terminfo/c \
+	 ${root}/usr/share/terminfo/e \
+	 ${root}/usr/share/terminfo/f \
+	 ${root}/usr/share/terminfo/g \
+	 ${root}/usr/share/terminfo/h \
+	 ${root}/usr/share/terminfo/i \
+	 ${root}/usr/share/terminfo/j \
+	 ${root}/usr/share/terminfo/k \
+	 ${root}/usr/share/terminfo/m \
+	 ${root}/usr/share/terminfo/n \
+	 ${root}/usr/share/terminfo/o \
+	 ${root}/usr/share/terminfo/p \
+	 ${root}/usr/share/terminfo/q \
+	 ${root}/usr/share/terminfo/s \
+	 ${root}/usr/share/terminfo/t \
+	 ${root}/usr/share/terminfo/u \
+	 ${root}/usr/share/terminfo/w \
+	 ${root}/usr/share/terminfo/z \
+	 ${root}/usr/share/terminfo/.keep_sys-libs_ncurses-0 \
+	 ${root}/usr/share/fonts/freefont/FreeM* \
+	 ${root}/usr/share/fonts/freefont/FreeSe* \
+	 ${root}/usr/share/fonts/freefont/FreeSansB* \
+	 ${root}/usr/share/fonts/freefont/FreeSansO* \
+	 ${root}/usr/share/fonts/freefont/*.dir \
+	 ${root}/usr/share/fonts/freefont/*.scale \
+	 ${root}/usr/share/X11/locale/a* \
+	 ${root}/usr/share/X11/locale/c* \
+	 ${root}/usr/share/X11/locale/e* \
+	 ${root}/usr/share/X11/locale/f* \
+	 ${root}/usr/share/X11/locale/g* \
+	 ${root}/usr/share/X11/locale/i* \
+	 ${root}/usr/share/X11/locale/j* \
+	 ${root}/usr/share/X11/locale/k* \
+	 ${root}/usr/share/X11/locale/m* \
+	 ${root}/usr/share/X11/locale/n* \
+	 ${root}/usr/share/X11/locale/p* \
+	 ${root}/usr/share/X11/locale/r* \
+	 ${root}/usr/share/X11/locale/s* \
+	 ${root}/usr/share/X11/locale/t* \
+	 ${root}/usr/share/X11/locale/v* \
+	 ${root}/usr/share/X11/locale/z* \
+	 ${root}/usr/share/alsa/alsa.conf.d \
+	 ${root}/usr/share/alsa/init \
+	 ${root}/usr/share/alsa/speaker-test \
+	 ${root}/usr/share/alsa/topology \
+	 ${root}/usr/share/alsa/ucm \
+	 ${root}/usr/tmp \
+	 ${root}/usr/portage \
+	 ${root}/usr/src \
+	 ${root}/usr/libexec \
+	 ${root}/var/cache/* \
+	 ${root}/var/db \
+	 ${root}/var/lib/gentoo \
+	 ${root}/var/lib/portage \
+	 ${root}/var/log/portage \
+	 ${root}/var/tmp/portage
+
+    sudo rm -rfv \
+	 ${root}/lib/libncurses* \
+	 ${root}/lib/libnss_c* \
+	 ${root}/lib/libnss_db* \
+	 ${root}/lib/libnss_h* \
+	 ${root}/lib/libnss_n* \
+	 ${root}/lib/modprobe* \
+	 ${root}/lib/cpp \
+	 ${root}/lib/libB* \
+	 ${root}/lib/libS* \
+	 ${root}/lib/libanl* \
+	 ${root}/lib/libcidn* \
+	 ${root}/lib/libhistory* \
+	 ${root}/lib/libmem* \
+	 ${root}/lib/libreadline* \
+	 ${root}/lib/libnsl* \
+	 ${root}/lib/libpcprofile* \
+	 ${root}/lib/libthread_db* \
+	 ${root}/usr/bin/update-mime-database \
+	 ${root}/usr/bin/fusermount \
+	 ${root}/usr/bin/startx \
+	 ${root}/usr/bin/wfcmgr \
+	 ${root}/usr/bin/wfica* \
+	 ${root}/usr/bin/filecap \
+	 ${root}/usr/bin/netcap \
+	 ${root}/usr/bin/fc-* \
+	 ${root}/usr/bin/net-snmp-c* \
+	 ${root}/usr/sbin/mount.unionfs \
+	 ${root}/usr/lib/xorg/modules/drivers/amdgpu_drv.so \
+	 ${root}/usr/lib/xorg/modules/extensions/libglx.so \
+	 ${root}/usr/lib/libBrokenLocale* \
+	 ${root}/usr/lib/libX11-xcb* \
+	 ${root}/usr/lib/libxcb-* \
+	 ${root}/usr/lib/libncurses* \
+	 ${root}/usr/lib/libcurses* \
+	 ${root}/usr/lib/libXdamage* \
+	 ${root}/usr/lib/libXfixes* \
+	 ${root}/usr/lib/libXxf86vm* \
+	 ${root}/usr/lib/libanl* \
+	 ${root}/usr/lib/libc.so* \
+	 ${root}/usr/lib/libcidn* \
+	 ${root}/usr/lib/libform* \
+	 ${root}/usr/lib/libhistory* \
+	 ${root}/usr/lib/libmenu* \
+	 ${root}/usr/lib/libpanel* \
+	 ${root}/usr/lib/libnsl.so* \
+	 ${root}/usr/lib/libnss_c* \
+	 ${root}/usr/lib/libnss_db* \
+	 ${root}/usr/lib/libnss_h* \
+	 ${root}/usr/lib/libnss_n* \
+	 ${root}/usr/lib/lib*.la \
+	 ${root}/usr/lib/libpcscspy* \
+	 ${root}/usr/lib/libpthread.so* \
+	 ${root}/usr/lib/libreadline.so* \
+	 ${root}/usr/lib/libthread_db* \
+	 ${root}/usr/lib/libulockmgr* \
+	 ${root}/usr/lib/bwidget-1.9.8/images \
+	 ${root}/usr/lib/bwidget-1.9.8/lang/d* \
+	 ${root}/usr/lib/bwidget-1.9.8/lang/es* \
+	 ${root}/usr/lib/bwidget-1.9.8/lang/f* \
+	 ${root}/usr/lib/bwidget-1.9.8/lang/h* \
+	 ${root}/usr/lib/bwidget-1.9.8/lang/n* \
+	 ${root}/usr/lib/bwidget-1.9.8/lang/p* \
+	 ${root}/usr/lib/bwidget-1.9.8/a* \
+	 ${root}/usr/lib/bwidget-1.9.8/b* \
+	 ${root}/usr/lib/bwidget-1.9.8/c* \
+	 ${root}/usr/lib/bwidget-1.9.8/d* \
+	 ${root}/usr/lib/bwidget-1.9.8/e* \
+	 ${root}/usr/lib/bwidget-1.9.8/f* \
+	 ${root}/usr/lib/bwidget-1.9.8/l* \
+	 ${root}/usr/lib/bwidget-1.9.8/m* \
+	 ${root}/usr/lib/bwidget-1.9.8/n* \
+	 ${root}/usr/lib/bwidget-1.9.8/pa* \
+	 ${root}/usr/lib/bwidget-1.9.8/pr* \
+	 ${root}/usr/lib/bwidget-1.9.8/se* \
+	 ${root}/usr/lib/bwidget-1.9.8/sp* \
+	 ${root}/usr/lib/bwidget-1.9.8/st* \
+	 ${root}/usr/lib/bwidget-1.9.8/scrollview.tcl \
+	 ${root}/usr/lib/bwidget-1.9.8/t* \
+	 ${root}/usr/lib/bwidget-1.9.8/wiz* \
+	 ${root}/usr/lib/bwidget-1.9.8/widget-old.tcl \
+	 ${root}/usr/lib/bwidget-1.9.8/x* \
+	 ${root}/usr/lib/tcl8.6/encoding \
+	 ${root}/usr/lib/tcl8.6/http* \
+	 ${root}/usr/lib/tcl8.6/include \
+	 ${root}/usr/lib/tcl8.6/msgs \
+	 ${root}/usr/lib/tcl8.6/opt* \
+	 ${root}/usr/lib/tcl8.6/include \
+	 ${root}/usr/lib/tk8.6/demos \
+	 ${root}/usr/lib/tk8.6/images \
+	 ${root}/usr/lib/tk8.6/include \
+	 ${root}/usr/lib/tk8.6/msgs \
+	 ${root}/usr/lib/tcllib1.15/a* \
+	 ${root}/usr/lib/tcllib1.15/b* \
+	 ${root}/usr/lib/tcllib1.15/c* \
+	 ${root}/usr/lib/tcllib1.15/d* \
+	 ${root}/usr/lib/tcllib1.15/f* \
+	 ${root}/usr/lib/tcllib1.15/g* \
+	 ${root}/usr/lib/tcllib1.15/h* \
+	 ${root}/usr/lib/tcllib1.15/j* \
+	 ${root}/usr/lib/tcllib1.15/l* \
+	 ${root}/usr/lib/tcllib1.15/m* \
+	 ${root}/usr/lib/tcllib1.15/n* \
+	 ${root}/usr/lib/tcllib1.15/o* \
+	 ${root}/usr/lib/tcllib1.15/u* \
+	 ${root}/usr/lib/tcllib1.15/r* \
+	 ${root}/usr/lib/tcllib1.15/s* \
+	 ${root}/usr/lib/tcllib1.15/t* \
+	 ${root}/usr/lib/tcllib1.15/w* \
+	 ${root}/usr/lib/tcllib1.15/v* \
+	 ${root}/usr/lib/tcllib1.15/y* \
+	 ${root}/usr/lib/tcllib1.15/z* \
+	 ${root}/usr/lib/tcllib1.15/id* \
+	 ${root}/usr/lib/tcllib1.15/im* \
+	 ${root}/usr/lib/tcllib1.15/ir* \
+	 ${root}/usr/lib/tcllib1.15/int* \
+	 ${root}/usr/lib/tcllib1.15/pag* \
+	 ${root}/usr/lib/tcllib1.15/pki* \
+	 ${root}/usr/lib/tcllib1.15/plu* \
+	 ${root}/usr/lib/tcllib1.15/pop* \
+	 ${root}/usr/lib/tcllib1.15/png* \
+	 ${root}/usr/lib/tcllib1.15/pro* \
+	 ${root}/usr/lib/tcllib1.15/pt* \
+	 ${root}/usr/lib/tcl8/8.4 \
+	 ${root}/usr/lib/tcl8/8.6 \
+	 ${root}/usr/lib/tcl8/8.5/tcl* \
+	 ${root}/usr/lib/mozilla \
+	 ${root}/usr/lib/ICAClient/desktop \
+	 ${root}/usr/lib/ICAClient/help \
+	 ${root}/usr/lib/ICAClient/keystore \
+	 ${root}/usr/lib/ICAClient/pkginf \
+	 ${root}/usr/lib/ICAClient/keyboard/ag* \
+	 ${root}/usr/lib/ICAClient/keyboard/d* \
+	 ${root}/usr/lib/ICAClient/keyboard/h* \
+	 ${root}/usr/lib/ICAClient/keyboard/n* \
+	 ${root}/usr/lib/ICAClient/keyboard/i* \
+	 ${root}/usr/lib/ICAClient/keyboard/l* \
+	 ${root}/usr/lib/ICAClient/keyboard/m* \
+	 ${root}/usr/lib/ICAClient/keyboard/s* \
+	 ${root}/usr/lib/ICAClient/keyboard/t* \
+	 ${root}/usr/lib/ICAClient/nls/de \
+	 ${root}/usr/lib/ICAClient/nls/ja \
+	 ${root}/usr/lib/ICAClient/nls/en/N* \
+	 ${root}/usr/lib/ICAClient/nls/en/X* \
+	 ${root}/usr/lib/ICAClient/nls/en/Wfc* \
+	 ${root}/usr/lib/ICAClient/nls/en/e* \
+	 ${root}/usr/lib/ICAClient/nls/en/i* \
+	 ${root}/usr/lib/ICAClient/nls/en/UTF-8/Wfc* \
+	 ${root}/usr/lib/ICAClient/nls/en/UTF-8/X* \
+	 ${root}/usr/lib/ICAClient/nls/en/UTF-8/e* \
+	 ${root}/usr/lib/ICAClient/util/e* \
+	 ${root}/usr/lib/ICAClient/util/g* \
+	 ${root}/usr/lib/ICAClient/util/h* \
+	 ${root}/usr/lib/ICAClient/util/n* \
+	 ${root}/usr/lib/ICAClient/util/i* \
+	 ${root}/usr/lib/ICAClient/util/l* \
+	 ${root}/usr/lib/ICAClient/util/s* \
+	 ${root}/usr/lib/ICAClient/util/w* \
+	 ${root}/usr/lib/ICAClient/util/x* \
+	 ${root}/usr/lib/ICAClient/util/pa* \
+	 ${root}/usr/lib/ICAClient/N* \
+	 ${root}/usr/lib/ICAClient/T* \
+	 ${root}/usr/lib/ICAClient/V* \
+	 ${root}/usr/lib/ICAClient/e* \
+	 ${root}/usr/lib/ICAClient/r* \
+	 ${root}/usr/lib/ICAClient/libctxipcPd.so \
+	 ${root}/usr/lib/ICAClient/libctxssl.so \
+	 ${root}/usr/lib/ICAClient/wfcmgr \
+	 ${root}/usr/lib/ICAClient/wfica \
+	 ${root}/usr/lib/ICAClient/ch* \
+	 ${root}/usr/lib/ICAClient/ct* \
+	 ${root}/usr/lib/ICAClient/ins* \
+	 ${root}/usr/share/bash-completion \
+	 ${root}/usr/share/rdesktop/keymaps/a* \
+	 ${root}/usr/share/rdesktop/keymaps/cs* \
+	 ${root}/usr/share/rdesktop/keymaps/d* \
+	 ${root}/usr/share/rdesktop/keymaps/en-d* \
+	 ${root}/usr/share/rdesktop/keymaps/en-g* \
+	 ${root}/usr/share/rdesktop/keymaps/es* \
+	 ${root}/usr/share/rdesktop/keymaps/et* \
+	 ${root}/usr/share/rdesktop/keymaps/f* \
+	 ${root}/usr/share/rdesktop/keymaps/h* \
+	 ${root}/usr/share/rdesktop/keymaps/i* \
+	 ${root}/usr/share/rdesktop/keymaps/j* \
+	 ${root}/usr/share/rdesktop/keymaps/k* \
+	 ${root}/usr/share/rdesktop/keymaps/l* \
+	 ${root}/usr/share/rdesktop/keymaps/mk* \
+	 ${root}/usr/share/rdesktop/keymaps/n* \
+	 ${root}/usr/share/rdesktop/keymaps/p* \
+	 ${root}/usr/share/rdesktop/keymaps/r* \
+	 ${root}/usr/share/rdesktop/keymaps/s* \
+	 ${root}/usr/share/rdesktop/keymaps/t* \
+	 ${root}/usr/share/terminfo/d/d1* \
+	 ${root}/usr/share/terminfo/d/d2* \
+	 ${root}/usr/share/terminfo/d/d4* \
+	 ${root}/usr/share/terminfo/d/d5* \
+	 ${root}/usr/share/terminfo/d/d8* \
+	 ${root}/usr/share/terminfo/d/darwin* \
+	 ${root}/usr/share/terminfo/d/data* \
+	 ${root}/usr/share/terminfo/d/dd* \
+	 ${root}/usr/share/terminfo/d/dec* \
+	 ${root}/usr/share/terminfo/d/del* \
+	 ${root}/usr/share/terminfo/d/dg* \
+	 ${root}/usr/share/terminfo/d/di* \
+	 ${root}/usr/share/terminfo/d/dj* \
+	 ${root}/usr/share/terminfo/d/dk* \
+	 ${root}/usr/share/terminfo/d/dm* \
+	 ${root}/usr/share/terminfo/d/dp* \
+	 ${root}/usr/share/terminfo/d/ds* \
+	 ${root}/usr/share/terminfo/d/dt* \
+	 ${root}/usr/share/terminfo/d/dw* \
+	 ${root}/usr/share/terminfo/l/la* \
+	 ${root}/usr/share/terminfo/l/lf* \
+	 ${root}/usr/share/terminfo/l/linux-* \
+	 ${root}/usr/share/terminfo/l/linux2* \
+	 ${root}/usr/share/terminfo/l/linux3* \
+	 ${root}/usr/share/terminfo/l/lis* \
+	 ${root}/usr/share/terminfo/l/ls* \
+	 ${root}/usr/share/terminfo/l/ln* \
+	 ${root}/usr/share/terminfo/l/lp* \
+	 ${root}/usr/share/terminfo/l/lu* \
+	 ${root}/usr/share/terminfo/r/rb* \
+	 ${root}/usr/share/terminfo/r/re* \
+	 ${root}/usr/share/terminfo/r/rc* \
+	 ${root}/usr/share/terminfo/r/rt* \
+	 ${root}/usr/share/terminfo/r/rxvt+* \
+	 ${root}/usr/share/terminfo/r/rxvt-1* \
+	 ${root}/usr/share/terminfo/r/rxvt-2* \
+	 ${root}/usr/share/terminfo/r/rxvt-8* \
+	 ${root}/usr/share/terminfo/r/rxvt-c* \
+	 ${root}/usr/share/terminfo/r/rxvt-x* \
+	 ${root}/usr/share/terminfo/r/rxvt-unicode-256color \
+	 ${root}/usr/share/terminfo/v/v2* \
+	 ${root}/usr/share/terminfo/v/v3* \
+	 ${root}/usr/share/terminfo/v/v5* \
+	 ${root}/usr/share/terminfo/v/va* \
+	 ${root}/usr/share/terminfo/v/vc* \
+	 ${root}/usr/share/terminfo/v/ve* \
+	 ${root}/usr/share/terminfo/v/vi* \
+	 ${root}/usr/share/terminfo/v/vk* \
+	 ${root}/usr/share/terminfo/v/vp* \
+	 ${root}/usr/share/terminfo/v/vr* \
+	 ${root}/usr/share/terminfo/v/vs* \
+	 ${root}/usr/share/terminfo/v/vt-* \
+	 ${root}/usr/share/terminfo/v/vt100+* \
+	 ${root}/usr/share/terminfo/v/vt100-* \
+	 ${root}/usr/share/terminfo/v/vte* \
+	 ${root}/usr/share/terminfo/v/vtn* \
+	 ${root}/usr/share/terminfo/v/vv* \
+	 ${root}/usr/share/terminfo/v/vw* \
+	 ${root}/usr/share/terminfo/v/vt100?* \
+	 ${root}/usr/share/terminfo/v/vt102?* \
+	 ${root}/usr/share/terminfo/v/vt12* \
+	 ${root}/usr/share/terminfo/v/vt13?* \
+	 ${root}/usr/share/terminfo/v/vt200?* \
+	 ${root}/usr/share/terminfo/v/vt220?* \
+	 ${root}/usr/share/terminfo/v/vt3* \
+	 ${root}/usr/share/terminfo/v/vt4* \
+	 ${root}/usr/share/terminfo/v/vt5* \
+	 ${root}/usr/share/terminfo/v/vt6* \
+	 ${root}/usr/share/terminfo/x/x1* \
+	 ${root}/usr/share/terminfo/x/x6* \
+	 ${root}/usr/share/terminfo/x/x8* \
+	 ${root}/usr/share/terminfo/x/xd* \
+	 ${root}/usr/share/terminfo/x/xe* \
+	 ${root}/usr/share/terminfo/x/xf* \
+	 ${root}/usr/share/terminfo/x/xi* \
+	 ${root}/usr/share/terminfo/x/xl* \
+	 ${root}/usr/share/terminfo/x/xn* \
+	 ${root}/usr/share/terminfo/x/xw* \
+	 ${root}/usr/share/terminfo/x/xta* \
+	 ${root}/usr/share/terminfo/x/xterm+* \
+	 ${root}/usr/share/terminfo/x/xterm-1* \
+	 ${root}/usr/share/terminfo/x/xterm-2* \
+	 ${root}/usr/share/terminfo/x/xterm-8* \
+	 ${root}/usr/share/terminfo/x/xterm-b* \
+	 ${root}/usr/share/terminfo/x/xterm-h* \
+	 ${root}/usr/share/terminfo/x/xterm-n* \
+	 ${root}/usr/share/terminfo/x/xterm-o* \
+	 ${root}/usr/share/terminfo/x/xterm-p* \
+	 ${root}/usr/share/terminfo/x/xterm-r* \
+	 ${root}/usr/share/terminfo/x/xterm-s* \
+	 ${root}/usr/share/terminfo/x/xterm-u* \
+	 ${root}/usr/share/terminfo/x/xterm-v* \
+	 ${root}/usr/share/terminfo/x/xterm-x1* \
+	 ${root}/usr/share/terminfo/x/xterm-xf8* \
+	 ${root}/usr/share/terminfo/x/xterm-xi* \
+	 ${root}/usr/share/terminfo/x/xterm1* \
+	 ${root}/usr/share/terminfo/x/xtermc* \
+	 ${root}/usr/share/terminfo/x/xtermm* \
+	 ${root}/usr/share/terminfo/x/xterms* \
+	 ${root}/usr/share/X11/xkb/geometry/a* \
+	 ${root}/usr/share/X11/xkb/geometry/c* \
+	 ${root}/usr/share/X11/xkb/geometry/d* \
+	 ${root}/usr/share/X11/xkb/geometry/e* \
+	 ${root}/usr/share/X11/xkb/geometry/f* \
+	 ${root}/usr/share/X11/xkb/geometry/h* \
+	 ${root}/usr/share/X11/xkb/geometry/k* \
+	 ${root}/usr/share/X11/xkb/geometry/m* \
+	 ${root}/usr/share/X11/xkb/geometry/n* \
+	 ${root}/usr/share/X11/xkb/geometry/t* \
+	 ${root}/usr/share/X11/xkb/geometry/w* \
+	 ${root}/usr/share/X11/xkb/geometry/so* \
+	 ${root}/usr/share/X11/xkb/geometry/su* \
+	 ${root}/usr/share/X11/xkb/geometry/sg* \
+	 ${root}/usr/share/X11/xkb/geometry/R* \
+	 ${root}/usr/share/X11/xkb/keycodes/am* \
+	 ${root}/usr/share/X11/xkb/keycodes/at* \
+	 ${root}/usr/share/X11/xkb/keycodes/f* \
+	 ${root}/usr/share/X11/xkb/keycodes/h* \
+	 ${root}/usr/share/X11/xkb/keycodes/i* \
+	 ${root}/usr/share/X11/xkb/keycodes/j* \
+	 ${root}/usr/share/X11/xkb/keycodes/m* \
+	 ${root}/usr/share/X11/xkb/keycodes/o* \
+	 ${root}/usr/share/X11/xkb/keycodes/s* \
+	 ${root}/usr/share/X11/xkb/keycodes/d* \
+	 ${root}/usr/share/X11/xkb/keycodes/R* \
+	 ${root}/usr/share/X11/xkb/keycodes/xfree9* \
+	 ${root}/usr/share/X11/xkb/rules/base.* \
+	 ${root}/usr/share/X11/xkb/rules/evdev.* \
+	 ${root}/usr/share/X11/xkb/rules/x* \
+	 ${root}/usr/share/X11/xkb/rules/R* \
+	 ${root}/usr/share/X11/xkb/symbols/af* \
+	 ${root}/usr/share/X11/xkb/symbols/al \
+	 ${root}/usr/share/X11/xkb/symbols/am* \
+	 ${root}/usr/share/X11/xkb/symbols/ar* \
+	 ${root}/usr/share/X11/xkb/symbols/az* \
+	 ${root}/usr/share/X11/xkb/symbols/b* \
+	 ${root}/usr/share/X11/xkb/symbols/c? \
+	 ${root}/usr/share/X11/xkb/symbols/d* \
+	 ${root}/usr/share/X11/xkb/symbols/ee \
+	 ${root}/usr/share/X11/xkb/symbols/epo \
+	 ${root}/usr/share/X11/xkb/symbols/es \
+	 ${root}/usr/share/X11/xkb/symbols/et \
+	 ${root}/usr/share/X11/xkb/symbols/eu \
+	 ${root}/usr/share/X11/xkb/symbols/f* \
+	 ${root}/usr/share/X11/xkb/symbols/g? \
+	 ${root}/usr/share/X11/xkb/symbols/h* \
+	 ${root}/usr/share/X11/xkb/symbols/i? \
+	 ${root}/usr/share/X11/xkb/symbols/j* \
+	 ${root}/usr/share/X11/xkb/symbols/k? \
+	 ${root}/usr/share/X11/xkb/symbols/l? \
+	 ${root}/usr/share/X11/xkb/symbols/m* \
+	 ${root}/usr/share/X11/xkb/symbols/n? \
+	 ${root}/usr/share/X11/xkb/symbols/r? \
+	 ${root}/usr/share/X11/xkb/symbols/s? \
+	 ${root}/usr/share/X11/xkb/symbols/t? \
+	 ${root}/usr/share/X11/xkb/symbols/ph \
+	 ${root}/usr/share/X11/xkb/symbols/pk \
+	 ${root}/usr/share/X11/xkb/symbols/pl \
+	 ${root}/usr/share/X11/xkb/symbols/pt \
+	 ${root}/usr/share/X11/xkb/symbols/ua \
+	 ${root}/usr/share/X11/xkb/symbols/uz \
+	 ${root}/usr/share/X11/xkb/symbols/v* \
+	 ${root}/usr/share/X11/xkb/symbols/z* \
+	 ${root}/usr/share/X11/xkb/symbols/ne* \
+	 ${root}/usr/share/X11/xkb/symbols/no* \
+	 ${root}/usr/share/X11/xkb/symbols/sgi* \
+	 ${root}/usr/share/X11/xkb/symbols/sha* \
+	 ${root}/usr/share/X11/xkb/symbols/son* \
+	 ${root}/usr/share/X11/xkb/symbols/sun* \
+	 ${root}/usr/share/X11/xkb/symbols/x* \
+	 ${root}/usr/share/X11/xkb/types/R* \
+	 ${root}/usr/share/bash-completion \
+	 ${root}/usr/share/doc \
+	 ${root}/usr/share/applications \
+	 ${root}/usr/share/fonts/freefont/*.ttf \
+	 ${root}/home \
+	 ${root}/opt \
+	 ${root}/usr/overlays \
+	 ${root}/boot \
+	 ${root}/media
+
+    sudo rm -rfv \
+	 ${root}/lib/modules/${kversion}/build \
+	 ${root}/lib/modules/${kversion}/source \
+	 ${root}/lib/modules/${kversion}/net \
+	 ${root}/lib/modules/${kversion}/kernel/arch/x86/[^k]* \
+	 ${root}/lib/modules/${kversion}/kernel/arch/x86/ke* \
+	 ${root}/lib/modules/${kversion}/kernel/crypto/[^acdehm]* \
+	 ${root}/lib/modules/${kversion}/kernel/crypto/c[^r]* \
+	 ${root}/lib/modules/${kversion}/kernel/crypto/cr[^c]* \
+	 ${root}/lib/modules/${kversion}/kernel/crypto/a[^r]* \
+	 ${root}/lib/modules/${kversion}/kernel/crypto/d[^e]* \
+	 ${root}/lib/modules/${kversion}/kernel/crypto/de[^s]* \
+	 ${root}/lib/modules/${kversion}/kernel/crypto/ec[^b]* \
+	 ${root}/lib/modules/${kversion}/kernel/crypto/m[^d]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/acpi/[^abftv]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/acpi/acpi* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/acpi/b[^u]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/ata/[^alp]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/ata/pata_[^v]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/ata/p[^a]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/ata/a[^ht]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/atm \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/bcma \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/block/[^fv]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/char/[^htlp]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/char/p[^p]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/char/h[^w]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/char/t[^p]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/char/tpm/[^t]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/char/tpm/tpm_[^t]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/clocksource \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/cpufreq/[^a]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/cpufreq/a[^c]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/crypto/[^gp]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/devfreq \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/dma \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/edac \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/firewire \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/firmware \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/gpio \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/gpu/drm/[^diqrtvn]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/gpu/drm/i[^9]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/gpu/drm/r[^a]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/gpu/drm/t[^t]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/gpu/drm/v[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/gpu/drm/vi[^a]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/hid/[^uh]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/hid/hid-[^g]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/hid/hid-g[^e]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/hid/hid-ge[^n]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/u[^s]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/hv \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/hwmon/[^chv]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/hwmon/v[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/hwmon/via[^-]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/i2c/i2c-[^s]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/i2c/i2c-s[^m]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/i2c/busses/i2c-[^ipv]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/i2c/busses/i2c-i[^8]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/i2c/busses/i2c-p[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/i2c/busses/i2c-vi[^a]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/i2c/busses/[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/iio \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/infiniband \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/[^egjms]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/m[^io]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/joy[^d]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/gameport/[^gn]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/misc/[^p]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/misc/p[^c]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/mouse/[^p]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/mouse/p[^s]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/serio/[^s]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/input/serio/ser[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/isdn \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/leds \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/md \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/media \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/memstick \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/message \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/mfd/[^l]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/misc/[^m]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/mmc/[^c]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/mmc/core/mmc_[^c]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/mmc/core/p* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/mmc/core/s* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/mtd \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/[^epmv]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/e[^t]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/p[^h]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/m[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/v[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/phy/[^bl]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/phy/l[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/phy/bcm[^-]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/ethernet/[^bimrv]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/ethernet/bro[^a]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/ethernet/m[^a]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/ethernet/r[^e]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/net/ethernet/intel/[^e]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/nvme \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/nvmem \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/of \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/parport/parport_[^p]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/pci/[^h]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/pci/hotplug/[^s]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/pcmcia/[^p]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/pcmcia/pcmcia_[^c]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/platform/[^x]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/platform/x86/[^hpw]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/platform/x86/hp-[^w]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/platform/x86/hp[^-]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/platform/x86/h[^p]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/platform/x86/hp-w[^m]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/platform/x86/p[^v]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/power \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/powercap \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/pps/[^p]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/scsi/[^s]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/scsi/scsi_[^m]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/scsi/s[^cdgr]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/spi \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/staging \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/target \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/thermal \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/thunderbolt \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/tty \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/usb/[^chs]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/usb/s[^t]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/usb/class/[^u]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/usb/class/usb[^l]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/usb/storage/ums-* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/vhost \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/video/[^f]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/video/fbdev/[^c]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/video/fbdev/c[^o]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/video/fbdev/core/fb_[^s]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/video/fbdev/core/s[^y]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/w1 \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/watchdog/[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/drivers/watchdog/i[^T]* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/c[^ir]* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/e[^x]* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/ex[^t]* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/l* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/nfs* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/nls/mac-* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/nls/nls_cp[^4]* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/nls/nls_iso8859-1[^\.]* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/nls/nls_iso8859-[^1]* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/nls/nls_euc* \
+	 ${root}/lib/modules/${kversion}/kernel/fs/nls/nls_koi* \
+	 ${root}/lib/modules/${kversion}/kernel/lib/[^cl]* \
+	 ${root}/lib/modules/${kversion}/kernel/lib/c[^r]* \
+	 ${root}/lib/modules/${kversion}/kernel/lib/crc[^-1]* \
+	 ${root}/lib/modules/${kversion}/kernel/lib/crc-[^ci]* \
+	 ${root}/lib/modules/${kversion}/kernel/lib/l[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/mm \
+	 ${root}/lib/modules/${kversion}/kernel/net/[^d]* \
+	 ${root}/lib/modules/${kversion}/kernel/net/d[^n]* \
+	 ${root}/lib/modules/${kversion}/kernel/security \
+	 ${root}/lib/modules/${kversion}/kernel/sound/[^achps]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/pc[^i]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/s[^o]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/so[^u]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/core/s[^n]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/core/snd-[^hpt]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/core/snd-h[^w]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/hda/ext \
+	 ${root}/lib/modules/${kversion}/kernel/sound/pci/[^achs]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/pci/a[^c]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/pci/c[^s]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/pci/cs[^5]* \
+	 ${root}/lib/modules/${kversion}/kernel/sound/pci/snd-[^i]*
+
+    setopt nomatch
+
+}
+
+install_system
+
+# locale.
+#chr ${name} rm /usr/lib/locale/locale-archive
+#sudo localedef -f UTF-8 -i tc-config/en_US -c ${root}/usr/lib/locale/en_US.UTF-8
+
+#chr ${name} localedef --add-to-archive /usr/lib/locale/en_US.UTF-8
+#chr ${name} rm -rf /usr/lib/locale/en_US.UTF-8
+
+# user.
+chr ${name} useradd -d /root -s /bin/sh -G users user
+chr ${name} usermod -L user
+
+# root.
+chr ${name} chsh -s /bin/sh root
+chr ${name} usermod -L root
+
+install_packages
+
+remove_packages
+
+# kernel modules.
+chr ${name} mkdir -p /lib/modules/${kversion}
+chr ${name} tar -J -x -v -C / -f ${kpkg} -x "lib"
+
+# citrix.
+sudo tar -J -x -v -C ${root} -f ~/gentoo/icaclient.tar.xz
+
+remove_files
+
+# kernel modules.
+sudo depmod -a -b ${root} ${kversion}
+
+sudo ln -sf bin/busybox ${root}/init
+sudo ln -sf busybox ${root}/bin/sh
+sudo ln -sf busybox ${root}/bin/hostname
+sudo ln -sf busybox ${root}/bin/ifconfig
+sudo ln -sf busybox ${root}/bin/netstat
+sudo ln -sf busybox ${root}/bin/route
+sudo ln -sf busybox ${root}/bin/dnsdomainname
+sudo ln -sf busybox ${root}/bin/lsmod
+sudo ln -sf busybox ${root}/bin/modinfo
+sudo ln -sf busybox ${root}/bin/sync
+sudo ln -sf busybox ${root}/bin/hostname
+sudo ln -sf busybox ${root}/bin/basename
+sudo ln -sf busybox ${root}/bin/kill
+sudo ln -sf busybox ${root}/bin/killall
+sudo ln -sf busybox ${root}/bin/test
+sudo ln -sf busybox ${root}/bin/mount
+sudo ln -sf busybox ${root}/bin/umount
+sudo ln -sf busybox ${root}/bin/mkdir
+sudo ln -sf busybox ${root}/bin/rmdir
+sudo ln -sf busybox ${root}/bin/touch
+sudo ln -sf busybox ${root}/bin/tail
+sudo ln -sf busybox ${root}/bin/sort
+sudo ln -sf busybox ${root}/bin/xargs
+sudo ln -sf busybox ${root}/bin/logger
+sudo ln -sf busybox ${root}/bin/sleep
+sudo ln -sf busybox ${root}/bin/true
+sudo ln -sf busybox ${root}/bin/false
+sudo ln -sf busybox ${root}/bin/chown
+sudo ln -sf ../bin/busybox ${root}/sbin/arp
+sudo ln -sf ../bin/busybox ${root}/sbin/depmod
+sudo ln -sf ../bin/busybox ${root}/sbin/insmod
+sudo ln -sf ../bin/busybox ${root}/sbin/lsmod
+sudo ln -sf ../bin/busybox ${root}/sbin/modinfo
+sudo ln -sf ../bin/busybox ${root}/sbin/modprobe
+sudo ln -sf ../bin/busybox ${root}/sbin/rmmod
+sudo ln -sf ../bin/busybox ${root}/sbin/init
+sudo ln -sf ../bin/busybox ${root}/sbin/klogd
+sudo ln -sf ../bin/busybox ${root}/sbin/syslogd
+sudo ln -sf ../bin/busybox ${root}/sbin/poweroff
+sudo ln -sf ../bin/busybox ${root}/sbin/reboot
+sudo ln -sf ../bin/busybox ${root}/sbin/halt
+sudo ln -sf ../bin/busybox ${root}/sbin/sysctl
+sudo ln -sf ../bin/busybox ${root}/sbin/klogd
+sudo ln -sf ../bin/busybox ${root}/sbin/udhcpc
+sudo ln -sf ../bin/busybox ${root}/sbin/ifconfig
+sudo ln -sf ../bin/busybox ${root}/sbin/hwclock
+sudo ln -sf ../bin/busybox ${root}/sbin/rdate
+sudo ln -sf ../bin/busybox ${root}/sbin/ntpd
+sudo ln -sf ../bin/busybox ${root}/sbin/start-stop-daemon
+sudo ln -sf ../bin/busybox ${root}/sbin/route
+sudo ln -sf ../../bin/busybox ${root}/usr/bin/flock
+sudo ln -sf ../../bin/busybox ${root}/usr/bin/logger
+sudo ln -sf ../../bin/busybox ${root}/usr/bin/env
+sudo ln -sf ../../bin/busybox ${root}/usr/sbin/syslogd
+sudo ln -sf ../../bin/busybox ${root}/usr/sbin/acpid
+sudo ln -sf C ${root}/usr/share/X11/locale/en_US.UTF-8
+sudo ln -sf ../lib/ICAClient/wfica.bin ${root}/usr/bin/wfica
+
+sudo chmod a+rx ${root}/root
+sudo mkdir ${root}/var/spool/lpd

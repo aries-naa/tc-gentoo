@@ -1,0 +1,17 @@
+#!/bin/sh
+
+echo ... stop syslogd ...
+
+# syslogd pid file
+syslogd_pid=$(cat /run/syslogd.pid)
+kill -9 ${syslogd_pid}
+
+# klogd pid file
+klogd_pid=$(cat /run/klogd.pid)
+kill -9 ${klogd_pid}
+
+if [ -f /etc/remote-syslog ]; then
+    rm /etc/remote-syslog
+fi
+
+logger -t TEST $0

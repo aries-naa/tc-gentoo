@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo ... lpd ...
+
+chown root:users /var/spool/lpd
+chmod g+rwx /var/spool/lpd
+
+modprobe parport
+modprobe parport_pc
+modprobe lp

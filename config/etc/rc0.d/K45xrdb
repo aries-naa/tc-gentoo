@@ -1,0 +1,9 @@
+#!/bin/sh
+
+echo ... stop xrdb ...
+
+if [ -f $HOME/.tk-tcmain ]; then
+    rm $HOME/.tk-tcmain
+fi
+
+logger -t TEST $0
